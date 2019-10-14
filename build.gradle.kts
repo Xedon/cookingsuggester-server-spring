@@ -1,6 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    id("com.palantir.docker") version "0.22.1"
     id("org.springframework.boot") version "2.1.9.RELEASE"
     id("io.spring.dependency-management") version "1.0.8.RELEASE"
     id("org.asciidoctor.convert") version "1.5.8"
@@ -26,6 +27,23 @@ repositories {
 }
 
 val snippetsDir = file("build/generated-snippets")
+docker {
+    name = "hub.docker.com/coockingsugester:${version}"
+    files(tasks.bootJar.get().outputs)
+
+}
+
+task<Copy>("unpack"
+) {
+    dependsOn(this.project.tasks.bootJar)
+    from(zipTree(tasks.bootJar.get().outputs.files.singleFile))
+    into("build/dependency")
+}
+docker {
+    name = "${project.group}/${project.name}"
+    copySpec.from(tasks.getByName("unpack").outputs).into("dependency")
+    buildArgs(mapOf("DEPENDENCY" to "dependency","MAIN_CLASS" to "de.ev.coockingsuggester.Booststrap"))
+}
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -46,7 +64,7 @@ dependencies {
     testImplementation("org.springframework.security:spring-security-test")
 }
 
-tasks.withType < KotlinCompile > {
+tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
         jvmTarget = "1.8"
