@@ -7,6 +7,13 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.core.userdetails.*
+import org.springframework.web.servlet.config.annotation.CorsRegistry
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import java.util.Collections.singletonList
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
+import org.springframework.web.filter.CorsFilter
+import java.util.*
 
 
 @Configuration
@@ -14,17 +21,7 @@ import org.springframework.security.core.userdetails.*
 class WebSecurityConfig : WebSecurityConfigurerAdapter() {
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
-        http
-                .authorizeRequests().anyRequest()
-                //.antMatchers("/", "/browser").permitAll()
-                //.anyRequest().authenticated()
-                //.and()
-                //.formLogin()
-                //.loginPage("/login")
-                //.permitAll()
-                //.and()
-                //.logout()
-                .permitAll()
+        http.antMatcher("/**").csrf().disable().authorizeRequests().anyRequest().anonymous();
     }
 
     @Bean
@@ -36,5 +33,17 @@ class WebSecurityConfig : WebSecurityConfigurerAdapter() {
                 .build()
 
         return InMemoryUserDetailsManager(user)
+    }
+
+    @Bean
+    fun corsFilter(): CorsFilter {
+        val source = UrlBasedCorsConfigurationSource()
+        val config = CorsConfiguration()
+        config.allowCredentials = true
+        config.allowedOrigins = Collections.singletonList("http://localhost:3000")
+        config.allowedHeaders = listOf("*")
+        config.allowedMethods = listOf("*")
+        source.registerCorsConfiguration("/api/**", config)
+        return CorsFilter(source)
     }
 }

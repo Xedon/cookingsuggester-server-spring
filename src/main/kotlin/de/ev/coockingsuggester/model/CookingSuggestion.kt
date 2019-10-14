@@ -13,6 +13,7 @@ class CookingSuggestion(
         @OneToOne(optional = false)
         var recipe: Recipe,
 
+        @Column
         var date: Date
 ) : Serializable
 
