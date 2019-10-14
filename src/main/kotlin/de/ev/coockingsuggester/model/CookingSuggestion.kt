@@ -7,6 +7,7 @@ import javax.persistence.*
 @Entity
 class CookingSuggestion(
         @Id
+        @Column
         @GeneratedValue(strategy = GenerationType.AUTO)
         var id: Long = 0,
 
