@@ -11,7 +11,8 @@ class CookingSuggestion(
         @GeneratedValue(strategy = GenerationType.AUTO)
         var id: Long = 0,
 
-        @OneToOne(optional = false)
+        @OneToOne
+        @JoinTable(name = "CookingSuggestion_Recipe")
         var recipe: Recipe,
 
         @Column

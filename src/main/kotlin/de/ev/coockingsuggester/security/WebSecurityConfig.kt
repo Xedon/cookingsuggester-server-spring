@@ -21,7 +21,9 @@ import java.util.*
 class WebSecurityConfig : WebSecurityConfigurerAdapter() {
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
-        http.antMatcher("/**").csrf().disable().authorizeRequests().anyRequest().anonymous();
+        http.antMatcher("/**").authorizeRequests().anyRequest().anonymous();
+        http.csrf().disable();
+        http.headers().frameOptions().disable();
     }
 
     @Bean

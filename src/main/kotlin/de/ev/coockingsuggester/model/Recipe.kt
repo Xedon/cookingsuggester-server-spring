@@ -25,6 +25,9 @@ class Recipe(
         @Column(nullable = false)
         var allowedOn: DayInWeek = DayInWeek.Both,
 
+        @OneToMany(mappedBy = "recipe")
+        var suggestions: Set<CookingSuggestion> = setOf(),
+
         @Column
         @ManyToMany
         @JoinTable(name = "recipe_foodtypes")

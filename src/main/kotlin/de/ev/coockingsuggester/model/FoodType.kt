@@ -1,9 +1,10 @@
 package de.ev.coockingsuggester.model
 
+import java.io.Serializable
 import javax.persistence.*
 
 @Entity
-class FoodType(
+class FoodType (
         @Id
         @Column
         @GeneratedValue(strategy = GenerationType.AUTO)
@@ -14,5 +15,5 @@ class FoodType(
 
         @ManyToMany(mappedBy = "foodTypes")
         var recipes: Set<Recipe>? = null
-) {
+): Serializable {
 }

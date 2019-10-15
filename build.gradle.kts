@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.springframework.boot.gradle.tasks.run.BootRun
 
 plugins {
     id("com.palantir.docker") version "0.22.1"
@@ -39,10 +40,15 @@ task<Copy>("unpack"
     from(zipTree(tasks.bootJar.get().outputs.files.singleFile))
     into("build/dependency")
 }
+
+tasks.withType<BootRun> {
+    args("--spring.profiles.active=dev")
+}
+
 docker {
     name = "${project.group}/${project.name}"
     copySpec.from(tasks.getByName("unpack").outputs).into("dependency")
-    buildArgs(mapOf("DEPENDENCY" to "dependency","MAIN_CLASS" to "de.ev.coockingsuggester.Booststrap"))
+    buildArgs(mapOf("DEPENDENCY" to "dependency", "MAIN_CLASS" to "de.ev.coockingsuggester.Booststrap"))
 }
 
 dependencies {
