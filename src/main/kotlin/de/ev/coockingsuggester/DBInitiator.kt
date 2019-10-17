@@ -6,12 +6,13 @@ import de.ev.coockingsuggester.model.Recipe
 import de.ev.coockingsuggester.repository.CookingSuggestionRepository
 import de.ev.coockingsuggester.repository.FoodTypeRepository
 import de.ev.coockingsuggester.repository.RecipeRepository
+import org.joda.time.LocalDate
 import org.springframework.beans.factory.annotation.Autowired
 
 import org.springframework.boot.CommandLineRunner
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import java.util.*
+
 
 @Configuration
 internal class LoadDatabase {
@@ -33,7 +34,7 @@ internal class LoadDatabase {
             )
 
             cookingSuggestionRepository.save(
-                    CookingSuggestion(date = Date(), recipe =
+                    CookingSuggestion(date = LocalDate.now(), recipe =
                     recipeRepository.save(
                             Recipe(
                                     name = "Lasagne",

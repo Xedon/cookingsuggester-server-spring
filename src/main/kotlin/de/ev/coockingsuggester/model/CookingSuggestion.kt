@@ -1,7 +1,7 @@
 package de.ev.coockingsuggester.model
 
+import org.joda.time.LocalDate
 import java.io.Serializable
-import java.util.*
 import javax.persistence.*
 
 @Entity
@@ -16,6 +16,6 @@ class CookingSuggestion(
         var recipe: Recipe,
 
         @Column
-        var date: Date
+        var date: LocalDate
 ) : Serializable
 

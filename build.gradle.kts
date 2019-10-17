@@ -42,7 +42,7 @@ task<Copy>("unpack"
 }
 
 tasks.withType<BootRun> {
-    args("--spring.profiles.active=dev")
+    environment("spring_profiles_active", "dev")
 }
 
 docker {
@@ -52,6 +52,11 @@ docker {
 }
 
 dependencies {
+    compile("joda-time:joda-time:2.10.4")
+    implementation("io.springfox:springfox-data-rest:2.9.2")
+    implementation("io.springfox:springfox-swagger2:2.9.2")
+    implementation("io.springfox:springfox-swagger-ui:2.9.2")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-data-rest")
     implementation("org.springframework.boot:spring-boot-starter-mail")
