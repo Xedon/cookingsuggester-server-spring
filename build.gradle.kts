@@ -53,6 +53,7 @@ docker {
 
 dependencies {
     compile("joda-time:joda-time:2.10.4")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-joda:2.10.0")
     implementation("io.springfox:springfox-data-rest:2.9.2")
     implementation("io.springfox:springfox-swagger2:2.9.2")
     implementation("io.springfox:springfox-swagger-ui:2.9.2")
