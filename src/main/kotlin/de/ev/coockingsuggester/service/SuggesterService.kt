@@ -1,22 +1,18 @@
 package de.ev.coockingsuggester.service
 
-import com.google.common.collect.Lists
 import de.ev.coockingsuggester.model.CookingSuggestion
 import de.ev.coockingsuggester.model.FoodType
 import de.ev.coockingsuggester.model.Recipe
 import de.ev.coockingsuggester.repository.CookingSuggestionRepository
 import de.ev.coockingsuggester.repository.RecipeRepository
-import org.apache.tomcat.util.http.fileupload.util.Streams
 import org.joda.time.Days
 import org.joda.time.LocalDate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
-import java.lang.RuntimeException
-import java.util.*
+import org.springframework.transaction.annotation.Transactional
 import java.util.stream.Collectors
 import java.util.stream.StreamSupport
-import kotlin.collections.LinkedHashSet
 
 @Service
 class SuggesterService {
@@ -41,7 +37,10 @@ class SuggesterService {
                 combinedFoodTypes as Collection<FoodType>
         )
         if (recipeSuggestion.isEmpty()) {
-            recipeSuggestion = StreamSupport.stream(recipeRepository.findAll().spliterator(), false).collect(Collectors.toList())
+            recipeSuggestion = StreamSupport.stream(
+                    recipeRepository.findAll().spliterator(),
+                    false
+            ).collect(Collectors.toList())
         }
 
         if (recipeSuggestion.isEmpty())
@@ -53,6 +52,7 @@ class SuggesterService {
         )
     }
 
+    @Transactional
     fun generateMissingSuggestions(
             from: LocalDate,
             to: LocalDate,
@@ -67,16 +67,18 @@ class SuggesterService {
                     Pageable.unpaged()
             )
             var possibleDay: LocalDate = from;
+            newSuggestions.addAll(suggestionHistory)
             do {
                 var suggestionFound = null != foundSuggestions.find { cookingSuggestion ->
                     cookingSuggestion.date == possibleDay
                 }
-                if(!suggestionFound){
-                    var newSuggestion = pickSuggestionByPast(suggestionHistory, possibleDay)
+                if (!suggestionFound) {
+                    var newSuggestion = pickSuggestionByPast(newSuggestions, possibleDay)
                     newSuggestions.add(newSuggestion)
                 }
                 possibleDay = possibleDay.plusDays(1)
             } while (!possibleDay.isAfter(to))
+            cookingSuggestionRepository.saveAll(newSuggestions)
         }
         return newSuggestions;
     }

@@ -4,16 +4,13 @@ import java.io.Serializable
 import javax.persistence.*
 
 @Entity
-class FoodType (
+data class FoodType(
         @Id
         @Column
         @GeneratedValue(strategy = GenerationType.AUTO)
         var id: Long? = 0,
 
         @Column(nullable = false)
-        var name: String,
-
-        @ManyToMany(mappedBy = "foodTypes")
-        var recipes: Set<Recipe>? = null
+        var name: String
 ): Serializable {
 }

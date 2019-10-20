@@ -4,7 +4,7 @@ import java.io.Serializable
 import javax.persistence.*
 
 @Entity
-class Recipe(
+data class Recipe(
         @Id
         @Column
         @GeneratedValue(strategy = GenerationType.AUTO)
@@ -25,12 +25,8 @@ class Recipe(
         @Column(nullable = false)
         var allowedOn: DayInWeek = DayInWeek.Both,
 
-        @OneToMany(mappedBy = "recipe")
-        var suggestions: Set<CookingSuggestion> = setOf(),
-
         @Column
         @ManyToMany
-        @JoinTable(name = "recipe_foodtypes")
         var foodTypes: Set<FoodType>? = null
 
 ) : Serializable {

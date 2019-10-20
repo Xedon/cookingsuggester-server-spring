@@ -8,4 +8,5 @@ import java.util.*
 @RepositoryRestResource(collectionResourceRel = "foodType", path = "/foodtype")
 interface FoodTypeRepository : PagingAndSortingRepository<FoodType, Long> {
     override fun findById(id: Long): Optional<FoodType>
+    fun findByName(name: String): Optional<FoodType>
 }
