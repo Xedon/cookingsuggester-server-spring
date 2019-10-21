@@ -1,5 +1,6 @@
 package de.ev.coockingsuggester.service
 
+import de.ev.coockingsuggester.InitialGermanData
 import de.ev.coockingsuggester.model.CookingSuggestion
 import de.ev.coockingsuggester.model.DayInWeek
 import de.ev.coockingsuggester.model.FoodType
@@ -33,12 +34,7 @@ internal class SuggesterServiceTest {
     @InjectMocks
     lateinit var suggesterService: SuggesterService
 
-    val mockFoodTypes = hashMapOf<String, FoodType>(
-            "Nudeln" to FoodType(name = "Nudeln"),
-            "Gemüse" to FoodType(name = "Gemüse"),
-            "Reis" to FoodType(name = "Reis"),
-            "Kartoffeln" to FoodType(name = "Kartoffeln")
-    )
+    private val mockFoodTypes = InitialGermanData.initialFoodTypes.map { it.name to it }.toMap()
     var mockRecipes = listOf(
             Recipe(
                     name = "Lasagne",
@@ -68,12 +64,12 @@ internal class SuggesterServiceTest {
     fun setUp() {
 
 
-        Mockito.doReturn(mockRecipes.filter {
-            recipe -> (recipe
-                .foodTypes
-                ?.contains(
-                        mockFoodTypes["Nudeln"]
-                ))?.not() ?: false
+        Mockito.doReturn(mockRecipes.filter { recipe ->
+            (recipe
+                    .foodTypes
+                    ?.contains(
+                            mockFoodTypes["Nudeln"]
+                    ))?.not() ?: false
         }).`when`(recipeRepository).findAllByFoodTypesNotIn(
                 ArgumentMatchers.anyCollection()
         )
@@ -94,10 +90,10 @@ internal class SuggesterServiceTest {
     @Test
     fun testPickSuggestionByPast() {
         var suggested = suggesterService.pickSuggestionByPast(
-                mockSuggestions.subList(0,1),
+                mockSuggestions.subList(0, 1),
                 LocalDate.now().minusDays(1)
         )
-        Assert.assertEquals(mockRecipes[1],suggested?.recipe)
+        Assert.assertEquals(mockRecipes[1], suggested?.recipe)
     }
 
     @Test
@@ -108,6 +104,6 @@ internal class SuggesterServiceTest {
                 mockSuggestions
         )
         Assert.assertTrue(suggested.size > 1)
-        Assert.assertEquals(mockRecipes[1],suggested[1].recipe)
+        Assert.assertEquals(mockRecipes[1], suggested[1].recipe)
     }
 }
