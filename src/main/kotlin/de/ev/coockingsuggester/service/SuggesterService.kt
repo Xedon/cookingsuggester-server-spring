@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.concurrent.ThreadLocalRandom
 import java.util.stream.Collectors
 import java.util.stream.StreamSupport
 
@@ -48,7 +49,7 @@ class SuggesterService {
 
         return CookingSuggestion(
                 date = forDate,
-                recipe = recipeSuggestion[((Math.random() * 100000000).toInt()) % recipeSuggestion.size]
+                recipe =  recipeSuggestion[ThreadLocalRandom.current().nextInt(recipeSuggestion.size) ]
         )
     }
 
