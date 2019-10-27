@@ -55,17 +55,64 @@ object InitialGermanData {
                     )
             ),
             Recipe(
+                    name = "Kartoffelwaffeln mit Zaziki",
+                    description = "Kartoffelgratin",
+                    recipeText = "",
+                    foodTypes = setOf(
+                            foodTypeRepository.findByName("Kartoffeln").get()
+                    )
+            ),
+            Recipe(
                     name = "Mienudeln",
                     description = "Mienudeln",
                     recipeText = "",
                     foodTypes = setOf(
                             foodTypeRepository.findByName("Nudeln").get()
                     )
-            )
-            ,
+            ),
             Recipe(
                     name = "Überbackener Blumenkohl",
                     description = "Blumenkohl überbackeb mit Käse",
+                    recipeText = "",
+                    foodTypes = setOf(
+                            foodTypeRepository.findByName("Gemüse").get()
+                    )
+            ),
+            Recipe(
+                    name = "Zuchini Tomaten Feta Auflauf",
+                    description = "",
+                    recipeText = "",
+                    foodTypes = setOf(
+                            foodTypeRepository.findByName("Gemüse").get()
+                    )
+            ),
+            Recipe(
+                    name = "Karotten mit Kartoffelbrei",
+                    description = "",
+                    recipeText = "",
+                    foodTypes = setOf(
+                            foodTypeRepository.findByName("Kartoffeln").get()
+                    )
+            ),
+            Recipe(
+                    name = "Spinat mit Kartoffelbrei",
+                    description = "",
+                    recipeText = "",
+                    foodTypes = setOf(
+                            foodTypeRepository.findByName("Kartoffeln").get()
+                    )
+            ),
+            Recipe(
+                    name = "Feta Spinat Lasagne",
+                    description = "",
+                    recipeText = "",
+                    foodTypes = setOf(
+                            foodTypeRepository.findByName("Nudeln").get()
+                    )
+            ),
+            Recipe(
+                    name = "Gemüsepfanne",
+                    description = "",
                     recipeText = "",
                     foodTypes = setOf(
                             foodTypeRepository.findByName("Gemüse").get()
