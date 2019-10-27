@@ -31,9 +31,9 @@ class SuggestionListController {
             produces = ["application/json"]
     )
     fun suggestions(
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             @RequestParam("from") from: LocalDate,
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             @RequestParam("to") to: LocalDate,
             pageable: Pageable
     ): PageImpl<CookingSuggestion> {
