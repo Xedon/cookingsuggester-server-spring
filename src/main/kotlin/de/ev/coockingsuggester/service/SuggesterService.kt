@@ -7,6 +7,7 @@ import de.ev.coockingsuggester.repository.CookingSuggestionRepository
 import de.ev.coockingsuggester.repository.RecipeRepository
 import org.joda.time.Days
 import org.joda.time.LocalDate
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -17,6 +18,8 @@ import java.util.stream.StreamSupport
 
 @Service
 class SuggesterService {
+
+    var logger = LoggerFactory.getLogger(this::class.java)
 
     @Autowired
     lateinit var cookingSuggestionRepository: CookingSuggestionRepository
@@ -34,10 +37,26 @@ class SuggesterService {
         combinedFoodTypes.addAll(((suggestionYesterday?.recipe?.foodTypes as Collection<Recipe>?)
                 ?: emptySet<Recipe>()))
         combinedFoodTypes.addAll(((suggestionTomorrow?.recipe?.foodTypes as Collection<Recipe>?) ?: emptySet<Recipe>()))
-        var recipeSuggestion = recipeRepository.findAllByFoodTypesNotIn(
+        var recipeSuggestion: List<Recipe> = recipeRepository.findAllByFoodTypesNotIn(
                 combinedFoodTypes as Collection<FoodType>
         )
+
+        if (logger.isTraceEnabled) {
+            logger.trace(
+                    "history: {} forDate: {} suggestions: {}",
+                    history.joinToString(),
+                    forDate,
+                    recipeSuggestion.joinToString()
+            )
+        }
+
+        recipeSuggestion = recipeSuggestion.filterNot { recipe: Recipe ->
+            history.map { cookingSuggestion -> cookingSuggestion.recipe }.contains(recipe)
+        }
+
         if (recipeSuggestion.isEmpty()) {
+            if (logger.isTraceEnabled)
+                logger.trace("empty list fallback")
             recipeSuggestion = StreamSupport.stream(
                     recipeRepository.findAll().spliterator(),
                     false
@@ -49,7 +68,7 @@ class SuggesterService {
 
         return CookingSuggestion(
                 date = forDate,
-                recipe =  recipeSuggestion[ThreadLocalRandom.current().nextInt(recipeSuggestion.size) ]
+                recipe = recipeSuggestion[ThreadLocalRandom.current().nextInt(recipeSuggestion.size)]
         )
     }
 
@@ -63,7 +82,7 @@ class SuggesterService {
         val daysDifference = Days.daysBetween(from.minusDays(1), to).days;
         if (foundSuggestions.size < daysDifference) {
             var suggestionHistory = cookingSuggestionRepository.findAllByDateBetween(
-                    from.minusDays(14),
+                    from.minusDays(7),
                     to,
                     Pageable.unpaged()
             )
