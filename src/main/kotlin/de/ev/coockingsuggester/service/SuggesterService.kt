@@ -87,13 +87,12 @@ class SuggesterService {
                     Pageable.unpaged()
             )
             var possibleDay: LocalDate = from;
-            newSuggestions.addAll(suggestionHistory)
             do {
                 var suggestionFound = null != foundSuggestions.find { cookingSuggestion ->
-                    cookingSuggestion.date == possibleDay
+                    cookingSuggestion.date.compareTo(possibleDay) == 0
                 }
                 if (!suggestionFound) {
-                    var newSuggestion = pickSuggestionByPast(newSuggestions, possibleDay)
+                    var newSuggestion = pickSuggestionByPast(suggestionHistory, possibleDay)
                     newSuggestions.add(newSuggestion)
                 }
                 possibleDay = possibleDay.plusDays(1)

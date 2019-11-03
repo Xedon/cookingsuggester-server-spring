@@ -5,6 +5,7 @@ import de.ev.coockingsuggester.repository.CookingSuggestionRepository
 import de.ev.coockingsuggester.service.SuggesterService
 import org.joda.time.LocalDate
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.format.annotation.DateTimeFormat
@@ -36,13 +37,27 @@ class SuggestionListController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
             @RequestParam("to") to: LocalDate,
             pageable: Pageable
-    ): PageImpl<CookingSuggestion> {
+    ): Page<CookingSuggestion> {
         val tmpSuggestions = cookingSuggestionRepository.findAllByDateBetween(from, to, pageable);
-        val suggestions = suggesterService.generateMissingSuggestions(
+        var suggestions = suggesterService.generateMissingSuggestions(
                 from,
                 to,
                 tmpSuggestions
         )
+
+        if (pageable.sort.isSorted) {
+            for (order in pageable.sort) {
+                when (order.property) {
+                    "date" -> {
+                        suggestions = if (order.isAscending) {
+                            suggestions.sortedBy { it.date }
+                        } else {
+                            suggestions.sortedByDescending { it.date }
+                        }
+                    }
+                }
+            }
+        }
 
         return PageImpl(suggestions, pageable, suggestions.size.toLong())
 

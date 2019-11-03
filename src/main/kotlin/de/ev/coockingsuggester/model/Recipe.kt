@@ -19,7 +19,7 @@ data class Recipe(
         @Column
         var source: String? = null,
 
-        @Column(name = "recipe_text")
+        @Column()
         var recipeText: String? = null,
 
         @Column(nullable = false)

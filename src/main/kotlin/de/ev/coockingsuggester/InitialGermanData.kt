@@ -56,7 +56,7 @@ object InitialGermanData {
             ),
             Recipe(
                     name = "Kartoffelwaffeln mit Zaziki",
-                    description = "Kartoffelgratin",
+                    description = "Kartoffelwaffeln mit Zaziki",
                     recipeText = "",
                     foodTypes = setOf(
                             foodTypeRepository.findByName("Kartoffeln").get()
