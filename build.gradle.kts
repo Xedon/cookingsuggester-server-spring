@@ -2,11 +2,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.run.BootRun
 
 plugins {
-    id("com.palantir.docker") version "0.22.1"
     id("org.springframework.boot") version "2.1.9.RELEASE"
     id("io.spring.dependency-management") version "1.0.8.RELEASE"
     id("org.asciidoctor.convert") version "1.5.8"
     id("idea")
+    id("com.google.cloud.tools.jib") version "1.8.0"
     kotlin("jvm") version "1.2.71"
     kotlin("plugin.spring") version "1.2.71"
     kotlin("plugin.jpa") version "1.2.71"
@@ -14,7 +14,7 @@ plugins {
 
 group = "de.ev"
 version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_11
+java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 val developmentOnly by configurations.creating
 configurations {
@@ -28,27 +28,24 @@ repositories {
 }
 
 val snippetsDir = file("build/generated-snippets")
-docker {
-    name = "hub.docker.com/coockingsugester:${version}"
-    files(tasks.bootJar.get().outputs)
-
-}
-
-task<Copy>("unpack"
-) {
-    dependsOn(this.project.tasks.bootJar)
-    from(zipTree(tasks.bootJar.get().outputs.files.singleFile))
-    into("build/dependency")
-}
 
 tasks.withType<BootRun> {
     environment("spring_profiles_active", "dev")
 }
 
-docker {
-    name = "${project.group}/${project.name}"
-    copySpec.from(tasks.getByName("unpack").outputs).into("dependency")
-    buildArgs(mapOf("DEPENDENCY" to "dependency", "MAIN_CLASS" to "de.ev.coockingsuggester.Booststrap"))
+jib {
+    to {
+        image = "cookingsuggester"
+        tags = setOf(version.toString())
+    }
+    container {
+        environment = mapOf(
+                "spring_datasource_url" to "jdbc:h2:mem:",
+                "spring_datasource_username" to "",
+                "spring_datasource_password" to "",
+                "spring_datasource_driver" to "",
+                "spring_profiles_active" to "prod")
+    }
 }
 
 dependencies {
