@@ -28,7 +28,7 @@ class SuggesterService {
     lateinit var recipeRepository: RecipeRepository
 
     fun pickSuggestionByPast(
-            history: List<CookingSuggestion>,
+            history: Collection<CookingSuggestion>,
             forDate: LocalDate
     ): CookingSuggestion {
         var suggestionTomorrow = history.find { forDate.plusDays(1).isEqual(it.date) }
@@ -92,7 +92,7 @@ class SuggesterService {
                     cookingSuggestion.date.compareTo(possibleDay) == 0
                 }
                 if (!suggestionFound) {
-                    var newSuggestion = pickSuggestionByPast(suggestionHistory, possibleDay)
+                    var newSuggestion = pickSuggestionByPast(suggestionHistory.union(newSuggestions), possibleDay)
                     newSuggestions.add(newSuggestion)
                 }
                 possibleDay = possibleDay.plusDays(1)

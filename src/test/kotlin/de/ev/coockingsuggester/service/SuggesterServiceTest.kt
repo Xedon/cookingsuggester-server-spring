@@ -2,14 +2,12 @@ package de.ev.coockingsuggester.service
 
 import de.ev.coockingsuggester.InitialGermanData
 import de.ev.coockingsuggester.model.CookingSuggestion
-import de.ev.coockingsuggester.model.DayInWeek
 import de.ev.coockingsuggester.model.FoodType
 import de.ev.coockingsuggester.model.Recipe
 import de.ev.coockingsuggester.repository.CookingSuggestionRepository
+import de.ev.coockingsuggester.repository.FoodTypeRepository
 import de.ev.coockingsuggester.repository.RecipeRepository
-import org.hamcrest.core.Is
 import org.joda.time.LocalDate
-import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -18,9 +16,9 @@ import org.mockito.ArgumentMatchers
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.internal.matchers.GreaterThan
 import org.mockito.junit.MockitoJUnitRunner
-import org.springframework.data.domain.Pageable
+import org.springframework.test.annotation.Repeat
+import java.util.*
 
 @RunWith(MockitoJUnitRunner::class)
 internal class SuggesterServiceTest {
@@ -31,79 +29,64 @@ internal class SuggesterServiceTest {
     @Mock
     lateinit var recipeRepository: RecipeRepository
 
+    @Mock
+    lateinit var foodTypeRepository: FoodTypeRepository
+
     @InjectMocks
     lateinit var suggesterService: SuggesterService
 
-    private val mockFoodTypes = InitialGermanData.initialFoodTypes.map { it.name to it }.toMap()
-    var mockRecipes = listOf(
-            Recipe(
-                    name = "Lasagne",
-                    allowedOn = DayInWeek.Both,
-                    foodTypes = setOf(
-                            mockFoodTypes["Nudeln"] as FoodType
-                    )
-            ),
-            Recipe(
-                    name = "Spargel",
-                    allowedOn = DayInWeek.Both,
-                    foodTypes = setOf(
-                            mockFoodTypes["Gemüse"] as FoodType
-                    )
-            )
-    )
 
-    var mockRecipesOrigin = mockRecipes.toList();
-    var mockSuggestions = listOf(
-            CookingSuggestion(
-                    recipe = mockRecipes[0], date = LocalDate.now()
-            )
-    )
-    var mockSuggestionsOrigin = mockSuggestions.toList();
+    private lateinit var mockRecipes: List<Recipe>
+    private lateinit var mockSuggestions: List<CookingSuggestion>
 
     @Before
     fun setUp() {
 
+        Mockito.doAnswer { req ->
+            Optional.ofNullable(InitialGermanData.initialFoodTypes.find {
+                it.name == req.arguments[0] as String
+            })
+        }.`when`(foodTypeRepository).findByName((ArgumentMatchers.anyString()))
 
-        Mockito.doReturn(mockRecipes.filter { recipe ->
-            (recipe
-                    .foodTypes
-                    ?.contains(
-                            mockFoodTypes["Nudeln"]
-                    ))?.not() ?: false
-        }).`when`(recipeRepository).findAllByFoodTypesNotIn(
-                ArgumentMatchers.anyCollection()
-        )
+        mockRecipes = InitialGermanData.initialRecipes(foodTypeRepository)
+        mockSuggestions = emptyList()
 
+        Mockito.doAnswer { req ->
+            val wantedFoodTypes = req.arguments[0] as Collection<FoodType>
+            mockRecipes.filter { recipe ->
+                recipe.foodTypes?.any { wantedFoodTypes.contains(it) }
+                        ?: wantedFoodTypes.isEmpty() || wantedFoodTypes.isEmpty()
+            }
+        }.`when`(recipeRepository).findAllByFoodTypesNotIn(ArgumentMatchers.anyCollection())
 
+        Mockito.doReturn(mockRecipes).`when`(recipeRepository).findAll()
+/*
         Mockito.doReturn(mockSuggestions).`when`(cookingSuggestionRepository).findAllByDateBetween(
                 LocalDate.now().minusDays(14), LocalDate.now().plusDays(1), Pageable.unpaged()
         )
 
-    }
+ */
 
-    @After
-    fun tearDown() {
-        mockRecipes = mockRecipesOrigin.toList()
-        mockSuggestions = mockSuggestionsOrigin.toList()
     }
 
     @Test
-    fun testPickSuggestionByPast() {
-        var suggested = suggesterService.pickSuggestionByPast(
-                mockSuggestions.subList(0, 1),
-                LocalDate.now().minusDays(1)
-        )
-        Assert.assertEquals(mockRecipes[1], suggested?.recipe)
-    }
-
-    @Test
-    fun testgenerateMissingSuggestions() {
+    fun noDuplicate() {
         var suggested = suggesterService.generateMissingSuggestions(
                 LocalDate.now(),
-                LocalDate.now().plusDays(1),
+                LocalDate.now().plusDays(6),
                 mockSuggestions
         )
-        Assert.assertTrue(suggested.size > 1)
-        Assert.assertEquals(mockRecipes[1], suggested[1].recipe)
+        Assert.assertEquals(7, suggested.size)
+        Assert.assertEquals(7, suggested.map { it.recipe.name }.toSet().size)
+    }
+
+    @Test
+    @Repeat(10)
+    fun testPickSuggestionByPast() {
+        var suggested = suggesterService.pickSuggestionByPast(
+                mockSuggestions,
+                LocalDate.now().minusDays(1)
+        )
+        Assert.assertNotNull(suggested)
     }
 }
